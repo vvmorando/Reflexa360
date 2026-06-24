@@ -10,16 +10,13 @@
 
 <body>
 
-<!-- SIDEBAR -->
 <div class="sidebar">
-
     <img src="Reflexa360.jpg">
 
     <div class="menu-item active" onclick="mostrar('dashboard', this)">📊 Dashboard</div>
     <div class="menu-item" onclick="mostrar('turmas', this)">📚 Turmas</div>
     <div class="menu-item" onclick="mostrar('config', this)">⚙️ Configurações</div>
     <div class="menu-item" onclick="logout()">🚪 Sair</div>
-
 </div>
 
 <div class="main">
@@ -27,13 +24,12 @@
 <h2>Visão da Turma</h2>
 <h3 id="prof"></h3>
 
-<!-- ================= DASHBOARD ================= -->
+<!-- DASHBOARD -->
 <div id="dashboard">
 
 <div class="card">
-<label>Selecione a turma</label><br><br>
 <select onchange="carregarTurma(this.value)">
-<option value="">Selecione...</option>
+<option value="">Selecione</option>
 <option value="A">Fundamental I - A</option>
 <option value="B">Fundamental I - B</option>
 </select>
@@ -44,12 +40,24 @@
 <div id="listaAlunos"></div>
 </div>
 
+<!-- ✅ EVOLUÇÃO COM GRAFICO AO LADO -->
 <div class="card">
+
 <h3>Evolução por Matéria</h3>
+
 <select id="sel" onchange="mostrarAluno()"></select>
+
+<div class="box-evolucao">
+
 <div id="detalhe"></div>
+
+<canvas id="graficoRadar" width="320" height="260"></canvas>
+
 </div>
 
+</div>
+
+<!-- ✅ DIAGNÓSTICO (CORRIGIDO) -->
 <div class="card">
 <h3>Diagnóstico Inteligente</h3>
 <div id="diagnostico">Selecione um aluno</div>
@@ -57,34 +65,35 @@
 
 </div>
 
-<!-- ================= TURMAS ================= -->
+<!-- TURMAS -->
 <div id="turmas" style="display:none;">
-
 <h2>Visão das Turmas</h2>
 
+<div style="display:flex;justify-content:flex-end;margin-bottom:10px;">
+    <button class="btn-acao">+ Acionar Turma</button>
+</div>
+
+
 <div class="card">
-<h3>Turmas</h3>
-
 <div id="listaTurmas"></div>
-
 </div>
 
 <div class="card" id="boxTurma" style="display:none;">
-<h3>Alunos</h3>
+<div style="display:flex;justify-content:space-between;align-items:center;">
+    <h3>Alunos</h3>
+    <button class="btn-acao">+ Adicionar Aluno</button>
+</div>
 <div id="listaTurma"></div>
 </div>
 
 </div>
 
-<!-- ================= CONFIG ================= -->
+<!-- CONFIG -->
 <div id="config" style="display:none;">
 <div class="card">
-<h3>Configurações</h3>
-
 <div class="aluno">🔑 Alterar senha</div>
 <div class="aluno">🌙 Tema escuro</div>
 <div class="aluno">👤 Perfil</div>
-
 </div>
 </div>
 
@@ -94,18 +103,19 @@
 
 let alunos=[];
 
+/* INIT */
 function init(){
 let p=new URLSearchParams(location.search);
-document.getElementById("prof").innerText="Professor: "+p.get("prof");
+prof.innerText="Professor: "+p.get("prof");
 }
 
+/* MENU */
 function mostrar(sec, el){
+dashboard.style.display="none";
+turmas.style.display="none";
+config.style.display="none";
 
-document.getElementById("dashboard").style.display="none";
-document.getElementById("turmas").style.display="none";
-document.getElementById("config").style.display="none";
-
-document.getElementById(sec).style.display="block";
+window[sec].style.display="block";
 
 document.querySelectorAll(".menu-item").forEach(i=>i.classList.remove("active"));
 if(el) el.classList.add("active");
@@ -117,131 +127,232 @@ function logout(){
 location.href="index.html";
 }
 
-/* ================= DASHBOARD ================= */
+/* DADOS */
+function carregarTurma(t){
 
-function carregarTurma(turma){
-
-if(turma==="A"){
+if(t==="A"){
 alunos=[
-
 {
 nome:"Lucas",
 materias:{
-Matemática:4, Português:6, Ciências:5, História:6
-}
-},
-
+"Língua Portuguesa":5,"Matemática":4,"Ciências":5,"História":6,"Geografia":6,"Artes":7,"Educação Física":7
+}},
 {
 nome:"Maria",
 materias:{
-Matemática:8, Português:9, Ciências:8, História:8
-}
-}
-
+"Língua Portuguesa":9,"Matemática":8,"Ciências":8,"História":8,"Geografia":8,"Artes":9,"Educação Física":9
+}}
 ];
 }
 
-if(turma==="B"){
+if(t==="B"){
 alunos=[
-
 {
 nome:"Pedro",
 materias:{
-Matemática:5, Português:6, Ciências:5, História:6
-}
-},
-
+"Língua Portuguesa":6,"Matemática":5,"Ciências":6,"História":7,"Geografia":6,"Artes":6,"Educação Física":7
+}},
 {
 nome:"Carlos",
 materias:{
-Matemática:7, Português:7, Ciências:8, História:7
-}
-}
-
+"Língua Portuguesa":7,"Matemática":7,"Ciências":8,"História":7,"Geografia":7,"Artes":8,"Educação Física":8
+}}
 ];
 }
 
-let lista="";
-let opt="<option></option>";
+let lista="", opt="<option></option>";
 
 alunos.forEach(a=>{
-
 let notas=Object.values(a.materias);
 let media=(notas.reduce((x,y)=>x+y)/notas.length).toFixed(1);
-
 let status=media<6?"critico":"ok";
 
-lista+=`
-<div class="aluno ${status}">
-<strong>${a.nome}</strong> — Média ${media}
-</div>
-`;
-
+lista+=`<div class="aluno ${status}"><b>${a.nome}</b> — Média ${media}</div>`;
 opt+=`<option>${a.nome}</option>`;
-
 });
 
 listaAlunos.innerHTML=lista;
 sel.innerHTML=opt;
 }
 
-/* DETALHE */
+/* ✅ MOSTRAR ALUNO COMPLETO */
 function mostrarAluno(){
 
 let a=alunos.find(x=>x.nome===sel.value);
 if(!a) return;
 
+/* TEXTO */
 let html="";
 Object.entries(a.materias).forEach(([m,n])=>{
-html+=`${m}: ${n}<br>`;
+let cor=n<6?"red":n<7?"orange":"green";
+html+=`${m}: <b style="color:${cor}">${n}</b><br>`;
 });
-
 detalhe.innerHTML=html;
 
+/* GRAFICO */
+desenharRadar(a.materias);
+
+/* DIAGNÓSTICO */
 let fracas=Object.entries(a.materias).filter(([m,n])=>n<6);
 
 if(fracas.length){
 
 diagnostico.innerHTML=`
 <div class="alerta">
+
 <strong>${a.nome}</strong><br><br>
-⚠ Dificuldade em:<br>
-${fracas.map(([m,n])=>`• ${m} (${n})`).join("<br>")}
+
+⚠ Dificuldades:<br>
+${fracas.map(([m])=>`• ${m}`).join("<br>")}
+
+<br><br>
+
+✅ Sugestões:<br>
+${gerarSugestao(fracas)}
+
+<br><br>
+
+<div style="display:flex; gap:10px; flex-wrap:wrap;">
+
+<button onclick="gerarReforco('${a.nome}')" class="btn-acao">🤖 Reforço</button>
+<button onclick="editarReforco('${a.nome}')" class="btn-acao-sec">✏️ Editar</button>
+<button onclick="enviarReforco('${a.nome}')" class="btn-acao-ok">📤 Enviar</button>
+
+</div>
+
+<div id="boxReforco" style="margin-top:15px;"></div>
+
 </div>
 `;
 
 }else{
-diagnostico.innerHTML=`<div class="okBox">✅ Bom desempenho</div>`;
-}
 
-}
+diagnostico.innerHTML=`
+<div class="okBox">
 
-/* ================= TURMAS ================= */
+✅ Bom desempenho
 
-function carregarListaTurmas(){
+<br><br>
 
-let turmas=[
-"Fundamental I - A",
-"Fundamental I - B"
-];
+<button onclick="gerarReforco('${a.nome}')" class="btn-acao">Gerar plano</button>
 
-let html="";
-
-turmas.forEach(t=>{
-
-html+=`
-<div class="aluno linha" onclick="abrirTurma('${t}')">
-
-<span>📘 ${t}</span>
-
-<span>
-<button onclick="event.stopPropagation(); editarTurma('${t}')">✏️</button>
-<button onclick="event.stopPropagation(); excluirTurma('${t}')">🗑</button>
-</span>
+<div id="boxReforco"></div>
 
 </div>
 `;
 
+}
+
+/* RANKING */
+gerarRanking();
+
+}
+
+/* ✅ GRAFICO */
+function desenharRadar(m){
+
+let ctx=graficoRadar.getContext("2d");
+ctx.clearRect(0,0,320,260);
+
+let labels=Object.keys(m);
+let valores=Object.values(m);
+
+let cx=160,cy=130,r=80;
+
+ctx.font="12px Arial";
+
+for(let i=0;i<labels.length;i++){
+
+let ang=(Math.PI*2/labels.length)*i-Math.PI/2;
+
+let x=cx+Math.cos(ang)*r;
+let y=cy+Math.sin(ang)*r;
+
+ctx.beginPath();
+ctx.moveTo(cx,cy);
+ctx.lineTo(x,y);
+ctx.strokeStyle="#ccc";
+ctx.stroke();
+
+ctx.fillText(labels[i],
+cx + Math.cos(ang)*(r+20) - 30,
+cy + Math.sin(ang)*(r+20)
+);
+}
+
+ctx.beginPath();
+
+valores.forEach((v,i)=>{
+let ang=(Math.PI*2/labels.length)*i-Math.PI/2;
+let x=cx+Math.cos(ang)*(v/10*r);
+let y=cy+Math.sin(ang)*(v/10*r);
+
+if(i===0) ctx.moveTo(x,y);
+else ctx.lineTo(x,y);
+});
+
+ctx.closePath();
+ctx.fillStyle="rgba(108,43,217,0.4)";
+ctx.fill();
+ctx.strokeStyle="#6c2bd9";
+ctx.stroke();
+
+}
+
+/* IA */
+function gerarReforco(n){
+boxReforco.innerHTML=`Plano gerado para ${n}`;
+}
+function editarReforco(n){
+boxReforco.innerHTML=`<textarea style="width:100%;height:100px;">Plano ${n}</textarea>`;
+}
+function enviarReforco(n){
+alert("Enviado para "+n);
+}
+
+/* RANKING */
+function gerarRanking(){
+
+let ord=alunos.map(a=>{
+let v=Object.values(a.materias);
+let m=v.reduce((x,y)=>x+y)/v.length;
+return {nome:a.nome,media:m};
+}).sort((a,b)=>b.media-a.media);
+
+let html="<br><b>🏆 Ranking</b><br>";
+ord.forEach((a,i)=>{
+html+=`${i+1}º ${a.nome} (${a.media.toFixed(1)})<br>`;
+});
+
+diagnostico.innerHTML+=html;
+}
+
+/* SUGESTÕES */
+function gerarSugestao(f){
+
+let mapa={
+"Língua Portuguesa":"Reforçar leitura",
+"Matemática":"Treinar operações",
+"Ciências":"Atividades práticas"
+};
+
+return f.map(([m])=>"• "+(mapa[m]||"Reforçar")).join("<br>");
+}
+
+/* TURMAS */
+function carregarListaTurmas(){
+let turmas=["Fundamental I - A","Fundamental I - B"];
+let html="";
+
+turmas.forEach(t=>{
+html+=`
+<div class="aluno linha" onclick="abrirTurma('${t}')">
+<span>📘 ${t}</span>
+<span>
+<button onclick="event.stopPropagation()">✏️</button>
+<button onclick="event.stopPropagation()">🗑</button>
+</span>
+</div>`;
 });
 
 listaTurmas.innerHTML=html;
@@ -249,45 +360,16 @@ listaTurmas.innerHTML=html;
 
 function abrirTurma(nome){
 
-let nomes=[];
-
-if(nome==="Fundamental I - A"){
-nomes=["Lucas","Maria"];
-}
-
-if(nome==="Fundamental I - B"){
-nomes=["Pedro","Carlos"];
-}
-
+let nomes=nome==="Fundamental I - A"?["Lucas","Maria"]:["Pedro","Carlos"];
 let html="";
 
 nomes.forEach(n=>{
-
-html+=`
-<div class="aluno linha">
-
-<span>${n}</span>
-
-<span>
-<button onclick="editarAluno('${n}')">✏️</button>
-<button onclick="excluirAluno('${n}')">🗑</button>
-</span>
-
-</div>
-`;
-
+html+=`<div class="aluno linha">${n}</div>`;
 });
 
 listaTurma.innerHTML=html;
 boxTurma.style.display="block";
 }
-
-/* AÇÕES */
-function editarTurma(n){ alert("Editar turma: "+n); }
-function excluirTurma(n){ alert("Excluir turma: "+n); }
-
-function editarAluno(n){ alert("Editar: "+n); }
-function excluirAluno(n){ alert("Excluir: "+n); }
 
 init();
 
