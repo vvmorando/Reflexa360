@@ -1,4 +1,6 @@
-name: Deploy GitHub Pages (with retry)name: Deploy GitHubon:
+name: Deploy static site
+
+on:
   push:
     branches: [main]
 
@@ -8,43 +10,17 @@ permissions:
   id-token: write
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Build site
-        uses: actions/jekyll-build-pages@v1
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
 
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-
-    strategy:
-      fail-fast: false
-      matrix:
-        attempt: [1, 2, 3]
-
-    steps:
-      - name: Deploy attempt ${{ matrix.attempt }}
-        id: deploy
-        continue-on-error: true
+      - name: Deploy
         uses: actions/deploy-pages@v5
-
-      - name: Stop if success
-        if: steps.deploy.outcome == 'success'
-        run: echo "Deploy OK"
-
-      - name: Wait before retry
-        if: steps.deploy.outcome != 'success' && matrix.attempt < 3
-        run: sleep 30
-
-      - name: Fail to retry
-        if: steps.deploy.outcome != 'success'
-        run: exit 1
-
-
