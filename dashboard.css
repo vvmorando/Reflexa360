@@ -1,0 +1,90 @@
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: #f4f6fb;
+}
+
+/* SIDEBAR */
+.sidebar {
+    width: 240px;
+    height: 100vh;
+    background: white;
+    position: fixed;
+    padding: 20px;
+}
+
+.sidebar img {
+    width: 140px;
+    margin-bottom: 30px;
+}
+
+/* MENU */
+.menu-item {
+    padding: 12px;
+    border-radius: 10px;
+    margin: 8px 0;
+    cursor: pointer;
+}
+
+/* ITEM ATIVO */
+.menu-item.active {
+    background: #eef3ff;
+    border-left: 5px solid #6c2bd9;
+    font-weight: bold;
+}
+
+/* MAIN */
+.main {
+    margin-left: 260px;
+    padding: 30px;
+}
+
+/* TITULOS */
+h3 {
+    color: #666;
+}
+
+/* CARDS */
+.card {
+    background: #f3f3f3;
+    padding: 25px;
+    border-radius: 16px;
+    margin-top: 20px;
+}
+
+/* ALUNOS */
+.aluno {
+    background: #ececec;
+    padding: 12px;
+    border-radius: 10px;
+    margin-top: 10px;
+}
+
+.critico {
+    border-left: 6px solid red;
+}
+
+.ok {
+    border-left: 6px solid green;
+}
+
+/* LINHA (editar/excluir) */
+.linha {
+    display: flex;
+    justify-content: space-between;
+}
+
+/* DIAGNÓSTICO */
+.alerta {
+    background: #e8dcc8;
+    padding: 15px;
+    border-radius: 10px;
+    border-left: 6px solid orange;
+}
+
+.okBox {
+    background: #e6ffed;
+    padding: 15px;
+    border-radius: 10px;
+    border-left: 6px solid green;
+}
